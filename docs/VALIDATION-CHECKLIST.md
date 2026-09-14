@@ -6,17 +6,26 @@ This checklist must be completed in Godot before PR #1 is merged.
 
 - [ ] Project opens without parse errors.
 - [ ] `scenes/main.tscn` starts as the main scene.
+- [ ] Exactly 50 participants are created at match start (1 player + 49 bots).
 - [ ] Player appears inside the arena.
 - [ ] Touch/drag moves the player horizontally.
 - [ ] Player remains inside the arena limits.
-- [ ] Three bots appear and move on their lanes.
+- [ ] Bots occupy the configured lanes and move deterministically.
 - [ ] Hazard traverses the arena vertically.
 - [ ] Hazard accelerates between hazard cycles.
 - [ ] Hazard collision removes a participant that it touches.
+- [ ] Participant counter decreases after eliminations.
 - [ ] Match state detects when one participant remains.
 - [ ] Result status reports survival time and final position.
 - [ ] Restarting the scene recreates player, bots and hazard.
 - [ ] No visible error occurs during a five-minute idle/run test.
+
+## Scale gate
+
+- [ ] 50 participants remain responsive on the reference Android device.
+- [ ] No obvious frame-time spike occurs during normal hazard movement.
+- [ ] No participant spawning occurs outside the arena bounds.
+- [ ] Bot movement remains stable when several participants are eliminated.
 
 ## Android gate
 
