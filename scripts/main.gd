@@ -16,6 +16,7 @@ var match_active := true
 var match_time := 0.0
 var finish_position := 0
 var elimination_count := 0
+var player_eliminated := false
 
 func _ready() -> void:
 	_spawn_player()
@@ -44,7 +45,6 @@ func _spawn_bots(count: int) -> void:
 	for index in range(count):
 		var bot := BOT_SCENE.instantiate()
 		var lane := index % BOT_LANE_COUNT
-		var row := index / BOT_LANE_COUNT
 		var lane_y := ARENA_TOP + 80.0 + float(lane) * 115.0
 		var phase := fmod(float(index) * 0.37, 2.0)
 		var spawn_x := ARENA_LEFT + fmod(float(index) * 113.0, ARENA_RIGHT - ARENA_LEFT)
@@ -68,12 +68,27 @@ func _update_status() -> void:
 	if status:
 		status.text = "PARTICIPANTES %02d/%02d · %.1fs" % [participants.size(), TOTAL_PARTICIPANTS, match_time]
 
-func register_elimination() -> void:
+func register_elimination(body: Node) -> void:
+	if not match_active:
+		return
 	elimination_count += 1
+	if body == _get_player_reference():
+		player_eliminated = true
+		finish_position = TOTAL_PARTICIPANTS - elimination_count + 1
+
+func _get_player_reference() -> Node:
+	for child in get_children():
+		if child.scene_file_path == PLAYER_SCENE.resource_path:
+			return child
+	return null
 
 func _end_match() -> void:
 	match_active = false
-	finish_position = 1 if participants.size() == 1 else 0
+	if participants.size() == 1:
+		finish_position = 1
 	var status := get_node_or_null("Status")
 	if status:
-		status.text = "PARTIDA TERMINADA · POSICIÓN %d · %.1fs" % [finish_position, match_time]
+		if player_eliminated:
+			status.text = "ELIMINADO · POSICIÓN %d · %.1fs" % [finish_position, match_time]
+		else:
+			status.text = "PARTIDA TERMINADA · POSICIÓN %d · %.1fs" % [finish_position, match_time]
