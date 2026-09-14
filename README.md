@@ -31,6 +31,8 @@ El proyecto prioriza herramientas y recursos sin coste, reutilización responsab
 
 ## Estado
 
-**Fase 1 — Diseño y arquitectura iniciada.**
+**Fase 2 — Prototipo jugable en construcción.**
 
-No se implementarán sistemas adicionales hasta que el alcance del MVP quede documentado y cada bloque tenga una prueba asociada.
+Ya existe la fundación Godot, la arena base, el jugador con control táctil/ratón y el primer controlador de bots determinista. El siguiente bloque funcional es el sistema de peligro y eliminación.
+
+No se implementarán sistemas adicionales hasta que cada bloque tenga una prueba asociada y pueda verificarse en Godot.
