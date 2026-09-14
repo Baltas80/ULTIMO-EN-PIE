@@ -33,6 +33,10 @@ El proyecto prioriza herramientas y recursos sin coste, reutilización responsab
 
 **Fase 2 — Prototipo jugable en construcción.**
 
-Ya existe la fundación Godot, la arena base, el jugador con control táctil/ratón y el primer controlador de bots determinista. El siguiente bloque funcional es el sistema de peligro y eliminación.
+Ya existe una base Godot con arena, jugador, tres bots y un primer peligro móvil. La ejecución en Godot/Android sigue siendo una puerta de validación pendiente; no se declara el bloque terminado hasta superarla.
+
+## Validación
+
+La lista de aceptación está en `docs/VALIDATION-CHECKLIST.md`.
 
 No se implementarán sistemas adicionales hasta que cada bloque tenga una prueba asociada y pueda verificarse en Godot.
