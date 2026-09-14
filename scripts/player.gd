@@ -1,23 +1,24 @@
 extends CharacterBody2D
 
-@export var move_speed: float = 320.0
-@export var arena_margin: float = 48.0
+@export var follow_strength: float = 12.0
+@export var arena_margin: float = 72.0
 
 var target_x: float
 
 func _ready() -> void:
 	target_x = position.x
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch and event.pressed:
+		target_x = event.position.x
+	elif event is InputEventScreenDrag:
+		target_x = event.position.x
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		target_x = event.position.x
+	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		target_x = event.position.x
+
 func _physics_process(delta: float) -> void:
-	if Input.is_action_pressed("touch_move_left"):
-		target_x -= move_speed * delta
-	if Input.is_action_pressed("touch_move_right"):
-		target_x += move_speed * delta
-
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		target_x = get_global_mouse_position().x
-
 	target_x = clamp(target_x, arena_margin, 720.0 - arena_margin)
-	velocity.x = (target_x - position.x) * 10.0
-	velocity.y = 0.0
-	move_and_slide()
+	position.x = move_toward(position.x, target_x, 420.0 * follow_strength * delta)
+	position.y = clamp(position.y, 220.0, 1080.0)
