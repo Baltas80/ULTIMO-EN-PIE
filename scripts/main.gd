@@ -21,7 +21,8 @@ func _spawn_player() -> void:
 func _spawn_bots() -> void:
 	for index in BOT_SPAWN_POSITIONS.size():
 		var bot := BOT_SCENE.instantiate()
-		bot.position = BOT_SPAWN_POSITIONS[index]
-		bot.lane_y = BOT_SPAWN_POSITIONS[index].y
+		var spawn_position: Vector2 = BOT_SPAWN_POSITIONS[index]
+		bot.position = spawn_position
+		bot.lane_y = spawn_position.y
 		bot.phase = float(index) * 0.7
 		add_child(bot)
