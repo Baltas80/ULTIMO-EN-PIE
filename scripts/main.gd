@@ -12,6 +12,7 @@ const ARENA_BOTTOM := 1080.0
 const BOT_LANE_COUNT := 7
 
 var participants: Array[Node] = []
+var player: Node = null
 var match_active := true
 var match_time := 0.0
 var finish_position := 0
@@ -36,7 +37,7 @@ func _process(delta: float) -> void:
 		_update_status()
 
 func _spawn_player() -> void:
-	var player := PLAYER_SCENE.instantiate()
+	player = PLAYER_SCENE.instantiate()
 	player.position = Vector2(360.0, 900.0)
 	add_child(player)
 	participants.append(player)
@@ -52,6 +53,7 @@ func _spawn_bots(count: int) -> void:
 		bot.lane_y = lane_y
 		bot.phase = phase
 		bot.move_speed = 105.0 + float(index % 5) * 18.0
+		bot.direction_hold_time = 2.6 + float(index % 4) * 0.45
 		add_child(bot)
 		participants.append(bot)
 
@@ -72,15 +74,9 @@ func register_elimination(body: Node) -> void:
 	if not match_active:
 		return
 	elimination_count += 1
-	if body == _get_player_reference():
+	if body == player:
 		player_eliminated = true
 		finish_position = TOTAL_PARTICIPANTS - elimination_count + 1
-
-func _get_player_reference() -> Node:
-	for child in get_children():
-		if child.scene_file_path == PLAYER_SCENE.resource_path:
-			return child
-	return null
 
 func _end_match() -> void:
 	match_active = false
