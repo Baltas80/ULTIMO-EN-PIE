@@ -7,12 +7,14 @@ extends Area2D
 
 var elapsed := 0.0
 var current_speed := 0.0
+var main_controller: Node = null
 
 func _ready() -> void:
 	monitoring = true
 	monitorable = true
 	position.y = start_y
 	current_speed = descent_speed
+	main_controller = get_parent()
 
 func _physics_process(delta: float) -> void:
 	elapsed += delta
@@ -25,4 +27,6 @@ func _physics_process(delta: float) -> void:
 
 func eliminate_participant(body: Node) -> void:
 	if body.has_method("eliminate"):
+		if main_controller and main_controller.has_method("register_elimination"):
+			main_controller.register_elimination(body)
 		body.eliminate()
