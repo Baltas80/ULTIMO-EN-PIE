@@ -19,7 +19,7 @@ func _spawn_player() -> void:
 	add_child(player)
 
 func _spawn_bots() -> void:
-	for index in BOT_SPAWN_POSITIONS.size():
+	for index in range(BOT_SPAWN_POSITIONS.size()):
 		var bot := BOT_SCENE.instantiate()
 		var spawn_position: Vector2 = BOT_SPAWN_POSITIONS[index]
 		bot.position = spawn_position
