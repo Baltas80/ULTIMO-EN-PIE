@@ -1,0 +1,27 @@
+; Engine configuration file.
+; ÚLTIMO EN PIE — MVP foundation
+
+config_version=5
+
+[application]
+config/name="ÚLTIMO EN PIE"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+[display/window]
+size/viewport_width=720
+size/viewport_height=1280
+size/window_width_override=360
+size/window_height_override=640
+stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.04, 0.04, 0.05, 1)
+
+[input]
+touch_move_left={"deadzone": 0.5, "events": [Object(InputEventScreenTouch,"resource_local_to_scene":false,"position":Vector2(0,0),"pressed":false,"double_tap":false,"index":0)]}
+touch_move_right={"deadzone": 0.5, "events": [Object(InputEventScreenDrag,"resource_local_to_scene":false,"position":Vector2(0,0),"relative":Vector2(0,0),"velocity":Vector2(0,0),"screen_relative":Vector2(0,0),"screen_velocity":Vector2(0,0),"pen_inverted":false)]}
