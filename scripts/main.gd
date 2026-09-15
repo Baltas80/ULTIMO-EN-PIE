@@ -19,6 +19,7 @@ var finish_position := 0
 var elimination_count := 0
 var player_eliminated := false
 var result_overlay: Control = null
+var status_flash_time := 0.0
 
 func _ready() -> void:
 	_spawn_player()
@@ -31,6 +32,8 @@ func _process(delta: float) -> void:
 	if not match_active:
 		return
 	match_time += delta
+	if status_flash_time > 0.0:
+		status_flash_time = maxf(status_flash_time - delta, 0.0)
 	_refresh_participants()
 	if participants.size() <= 1:
 		_end_match()
@@ -71,17 +74,28 @@ func _refresh_participants() -> void:
 
 func _update_status() -> void:
 	var status := get_node_or_null("Status")
-	if status:
+	if status and status_flash_time <= 0.0:
 		status.text = "PARTICIPANTES %02d/%02d · %.1fs" % [participants.size(), TOTAL_PARTICIPANTS, match_time]
 
 func register_elimination(body: Node) -> void:
 	if not match_active:
 		return
 	elimination_count += 1
+	_spawn_elimination_feedback(body.position)
 	if body == player:
 		player_eliminated = true
 		finish_position = clampi(TOTAL_PARTICIPANTS - elimination_count + 1, 1, TOTAL_PARTICIPANTS)
 		_end_match()
+	else:
+		var status := get_node_or_null("Status")
+		if status:
+			status.text = "ELIMINADO · %02d RESTANTES · %.1fs" % [participants.size() - 1, match_time]
+		status_flash_time = 0.45
+
+func _spawn_elimination_feedback(world_position: Vector2) -> void:
+	var feedback := preload("res://scripts/elimination_feedback.gd").new()
+	feedback.position = world_position
+	add_child(feedback)
 
 func _end_match() -> void:
 	if not match_active:
@@ -107,6 +121,7 @@ func _show_result_screen() -> void:
 	result_overlay.name = "ResultOverlay"
 	result_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	result_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	result_overlay.modulate.a = 0.0
 	add_child(result_overlay)
 
 	var backdrop := ColorRect.new()
@@ -118,6 +133,8 @@ func _show_result_screen() -> void:
 	var panel := PanelContainer.new()
 	panel.position = Vector2(90.0, 360.0)
 	panel.size = Vector2(540.0, 420.0)
+	panel.pivot_offset = panel.size / 2.0
+	panel.scale = Vector2(0.94, 0.94)
 	result_overlay.add_child(panel)
 
 	var panel_style := StyleBoxFlat.new()
@@ -165,7 +182,12 @@ func _show_result_screen() -> void:
 	replay.add_theme_font_size_override("font_size", 22)
 	replay.pressed.connect(_restart_match)
 	content.add_child(replay)
-	replay.grab_focus()
+
+	var intro := create_tween().set_parallel(true)
+	intro.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	intro.tween_property(result_overlay, "modulate:a", 1.0, 0.22)
+	intro.tween_property(panel, "scale", Vector2.ONE, 0.24)
+	intro.finished.connect(replay.grab_focus)
 
 func _restart_match() -> void:
 	get_tree().reload_current_scene()
