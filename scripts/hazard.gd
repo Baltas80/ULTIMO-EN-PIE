@@ -4,8 +4,10 @@ extends Area2D
 @export var end_y: float = 1080.0
 @export var descent_speed: float = 90.0
 @export var acceleration: float = 6.0
+@export var cycle_speed_step: float = 12.0
 
 var elapsed := 0.0
+var cycle_index := 0
 var current_speed := 0.0
 var main_controller: Node = null
 
@@ -18,12 +20,13 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	elapsed += delta
-	current_speed = descent_speed + acceleration * elapsed
+	current_speed = descent_speed + float(cycle_index) * cycle_speed_step + acceleration * elapsed
 	position.y += current_speed * delta
 	if position.y >= end_y:
 		position.y = start_y
 		elapsed = 0.0
-		current_speed = descent_speed
+		cycle_index += 1
+		current_speed = descent_speed + float(cycle_index) * cycle_speed_step
 
 func eliminate_participant(body: Node) -> void:
 	if body.has_method("eliminate"):
