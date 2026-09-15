@@ -109,3 +109,71 @@ jobs:
             echo "A tracked project file exceeds 10 MB. Review before merging."
             exit 1
           fi
+
+  godot:
+    name: Validate with Godot 4.7.2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download official Godot 4.7.2 headless editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import urllib.request
+
+          api = 'https://api.github.com/repos/godotengine/godot-builds/releases/tags/4.7.2-stable'
+          with urllib.request.urlopen(api) as response:
+              release = json.load(response)
+
+          assets = release['assets']
+          matches = [
+              asset for asset in assets
+              if 'linux_headless.64.zip' in asset['name']
+          ]
+          if len(matches) != 1:
+              raise SystemExit(f'Expected one Linux headless asset, found {len(matches)}')
+
+          asset = matches[0]
+          print(asset['browser_download_url'])
+          with open('godot-download-url.txt', 'w', encoding='utf-8') as handle:
+              handle.write(asset['browser_download_url'])
+          PY
+          curl --fail --location --retry 3 "$(cat godot-download-url.txt)" --output godot.zip
+          unzip -q godot.zip
+          GODOT_BIN="$(find . -maxdepth 2 -type f -name 'Godot_v4.7.2-stable_linux_headless.64' -print -quit)"
+          test -n "$GODOT_BIN"
+          chmod +x "$GODOT_BIN"
+          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
+
+      - name: Parse all GDScript files
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' script; do
+            echo "Checking $script"
+            "$GODOT_BIN" --headless --path . --check-only --script "$script"
+          done < <(find scripts -type f -name '*.gd' -print0 | sort -z)
+
+      - name: Load project and main scene
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --editor --quit
+
+      - name: Runtime smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          "$GODOT_BIN" --headless --path . --quit-after 120 2>&1 | tee godot-runtime.log
+          status=${PIPESTATUS[0]}
+          set -e
+          test "$status" -eq 0
+          if grep -E 'SCRIPT ERROR|Parse Error' godot-runtime.log; then
+            echo 'Godot runtime smoke test reported a script error.'
+            exit 1
+          fi
