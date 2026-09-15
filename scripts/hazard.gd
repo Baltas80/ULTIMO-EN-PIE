@@ -37,7 +37,8 @@ func _physics_process(delta: float) -> void:
 		current_speed = descent_speed + float(cycle_index) * cycle_speed_step
 
 func eliminate_participant(body: Node) -> void:
-	if body.has_method("eliminate"):
-		if main_controller and main_controller.has_method("register_elimination"):
-			main_controller.register_elimination(body)
-		body.eliminate()
+	if not body.has_method("eliminate") or body.get("active") != true:
+		return
+	if main_controller and main_controller.has_method("register_elimination"):
+		main_controller.register_elimination(body)
+	body.eliminate()
