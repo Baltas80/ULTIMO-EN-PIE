@@ -77,10 +77,13 @@ func register_elimination(body: Node) -> void:
 	if body == player:
 		player_eliminated = true
 		finish_position = TOTAL_PARTICIPANTS - elimination_count + 1
+		_end_match()
 
 func _end_match() -> void:
+	if not match_active:
+		return
 	match_active = false
-	if participants.size() == 1:
+	if participants.size() == 1 and not player_eliminated:
 		finish_position = 1
 	var status := get_node_or_null("Status")
 	if status:
