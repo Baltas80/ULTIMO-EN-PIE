@@ -1,14 +1,16 @@
 # Validation checklist — core prototype
 
+This checklist is the release gate for the core MVP. A check is only marked complete after the behavior is observed in the target runtime.
+
 ## Runtime gate
 
-This checklist must be completed in Godot before PR #1 is merged.
+This checklist must be completed in Godot before the core gameplay PR is merged.
 
 - [ ] Project opens without parse errors.
 - [ ] `scenes/main.tscn` starts as the main scene.
 - [ ] Exactly 50 participants are created at match start (1 player + 49 bots).
 - [ ] Player appears inside the arena.
-- [ ] Touch/drag moves the player horizontally.
+- [ ] Touch/drag moves the player horizontally with correct viewport mapping.
 - [ ] Player remains inside the arena limits.
 - [ ] Bots occupy the configured lanes and move deterministically.
 - [ ] Hazard traverses the arena vertically.
@@ -34,10 +36,18 @@ This checklist must be completed in Godot before PR #1 is merged.
 - [ ] Touch input works on the reference device.
 - [ ] No blocking runtime errors are observed.
 
+## Visual gate
+
+- [ ] Arena reads clearly on a phone-sized display.
+- [ ] Player is immediately distinguishable from bots.
+- [ ] Hazard is immediately distinguishable from arena geometry.
+- [ ] HUD remains legible during active gameplay.
+- [ ] Result screen is readable and the replay action is obvious.
+
 ## Scope gate
 
-Do not add scoring, progression, online multiplayer, cosmetics or additional hazard families until this checklist passes.
+Do not add scoring progression, online multiplayer, cosmetics or additional hazard families until the runtime, scale and Android gates pass.
 
 ## Current limitation
 
-Runtime and Android validation remain pending because the current execution environment does not provide Godot or the Android SDK.
+Runtime and Android validation remain pending because the current execution environment does not provide a runnable Godot/Android toolchain. Static repository checks can be executed, but they do not substitute for device validation.
