@@ -10,6 +10,8 @@ var elapsed := 0.0
 var cycle_index := 0
 var current_speed := 0.0
 var main_controller: Node = null
+@onready var core: Polygon2D = $Core
+var visual_time := 0.0
 
 func _ready() -> void:
 	monitoring = true
@@ -17,6 +19,12 @@ func _ready() -> void:
 	position.y = start_y
 	current_speed = descent_speed
 	main_controller = get_parent()
+
+func _process(delta: float) -> void:
+	visual_time += delta
+	var pulse := 1.0 + 0.10 * sin(visual_time * 5.0)
+	core.scale.x = pulse
+	core.scale.y = pulse
 
 func _physics_process(delta: float) -> void:
 	elapsed += delta
