@@ -1,0 +1,61 @@
+name: Project Quality
+
+on:
+  push:
+    branches:
+      - master
+      - 'feat/**'
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: Validate project structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            project.godot
+            scenes/main.tscn
+            scenes/player.tscn
+            scenes/bot.tscn
+            scenes/hazard.tscn
+            scripts/main.gd
+            scripts/player.gd
+            scripts/bot.gd
+            scripts/hazard.gd
+            docs/GDD-MVP.md
+            docs/TECH-PLAN.md
+            docs/ROADMAP-7-DIAS.md
+            docs/VALIDATION-CHECKLIST.md
+          )
+          for file in "${required[@]}"; do
+            test -f "$file" || { echo "Missing required file: $file"; exit 1; }
+          done
+
+      - name: Check Godot project configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^config_version=5$' project.godot
+          grep -q '^run/main_scene="res://scenes/main.tscn"$' project.godot
+          grep -q 'config/features=PackedStringArray("4.7"' project.godot
+
+      - name: Detect accidental large generated files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -type f -not -path './.git/*' -size +10M -print -quit | grep -q .; then
+            echo "A tracked project file exceeds 10 MB. Review before merging."
+            exit 1
+          fi
