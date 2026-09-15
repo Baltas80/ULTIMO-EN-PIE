@@ -18,6 +18,7 @@ var match_time := 0.0
 var finish_position := 0
 var elimination_count := 0
 var player_eliminated := false
+var result_overlay: Control = null
 
 func _ready() -> void:
 	_spawn_player()
@@ -91,3 +92,75 @@ func _end_match() -> void:
 			status.text = "ELIMINADO · POSICIÓN %d · %.1fs" % [finish_position, match_time]
 		else:
 			status.text = "PARTIDA TERMINADA · POSICIÓN %d · %.1fs" % [finish_position, match_time]
+	_show_result_screen()
+
+func _show_result_screen() -> void:
+	if is_instance_valid(result_overlay):
+		return
+
+	result_overlay = Control.new()
+	result_overlay.name = "ResultOverlay"
+	result_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	result_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(result_overlay)
+
+	var backdrop := ColorRect.new()
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.color = Color(0.02, 0.025, 0.035, 0.94)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	result_overlay.add_child(backdrop)
+
+	var panel := PanelContainer.new()
+	panel.position = Vector2(90.0, 360.0)
+	panel.size = Vector2(540.0, 420.0)
+	result_overlay.add_child(panel)
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.07, 0.08, 0.11, 1.0)
+	panel_style.border_color = Color(0.22, 0.25, 0.32, 1.0)
+	panel_style.set_border_width_all(2)
+	panel_style.corner_radius_top_left = 24
+	panel_style.corner_radius_top_right = 24
+	panel_style.corner_radius_bottom_left = 24
+	panel_style.corner_radius_bottom_right = 24
+	panel.add_theme_stylebox_override("panel", panel_style)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 22)
+	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 42)
+	panel.add_child(content)
+
+	var heading := Label.new()
+	heading.text = "RESULTADO"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 34)
+	content.add_child(heading)
+
+	var position_label := Label.new()
+	position_label.text = "POSICIÓN %d" % finish_position
+	position_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	position_label.add_theme_font_size_override("font_size", 48)
+	content.add_child(position_label)
+
+	var time_label := Label.new()
+	time_label.text = "Tiempo de supervivencia  ·  %.1f s" % match_time
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	time_label.add_theme_font_size_override("font_size", 20)
+	content.add_child(time_label)
+
+	var result_label := Label.new()
+	result_label.text = "Has sido eliminado" if player_eliminated else "¡Eres el último en pie!"
+	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_label.add_theme_font_size_override("font_size", 24)
+	content.add_child(result_label)
+
+	var replay := Button.new()
+	replay.text = "JUGAR DE NUEVO"
+	replay.custom_minimum_size = Vector2(0, 68)
+	replay.add_theme_font_size_override("font_size", 22)
+	replay.pressed.connect(_restart_match)
+	content.add_child(replay)
+	replay.grab_focus()
+
+func _restart_match() -> void:
+	get_tree().reload_current_scene()
