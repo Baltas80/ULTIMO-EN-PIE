@@ -64,7 +64,11 @@ func _spawn_hazard() -> void:
 	add_child(hazard)
 
 func _refresh_participants() -> void:
-	participants = participants.filter(func(item: Node) -> bool: return is_instance_valid(item) and item.is_inside_tree())
+	var active_participants: Array[Node] = []
+	for item in participants:
+		if is_instance_valid(item) and item.is_inside_tree():
+			active_participants.append(item)
+	participants = active_participants
 
 func _update_status() -> void:
 	var status := get_node_or_null("Status")
