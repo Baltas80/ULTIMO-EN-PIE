@@ -50,6 +50,56 @@ jobs:
           grep -q '^config_version=5$' project.godot
           grep -q '^run/main_scene="res://scenes/main.tscn"$' project.godot
           grep -q 'config/features=PackedStringArray("4.7"' project.godot
+          test -f scenes/main.tscn
+
+      - name: Validate res:// references
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          references = []
+          patterns = [
+              re.compile(r'path="(res://[^"\n]+)"'),
+              re.compile(r'preload\("(res://[^"\n]+)"\)'),
+          ]
+
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts:
+                  continue
+              if path.suffix not in {'.tscn', '.gd'}:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              for pattern in patterns:
+                  references.extend((path, match.group(1)) for match in pattern.finditer(text))
+
+          missing = []
+          for source, reference in references:
+              target = root / reference.removeprefix('res://')
+              if not target.is_file():
+                  missing.append(f'{source}: {reference}')
+
+          if missing:
+              print('Broken res:// references:')
+              print('\n'.join(missing))
+              raise SystemExit(1)
+
+          print(f'Validated {len(references)} res:// file references.')
+          PY
+
+      - name: Validate MVP invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'const TOTAL_PARTICIPANTS := 50' scripts/main.gd
+          grep -q '_spawn_bots(TOTAL_PARTICIPANTS - 1)' scripts/main.gd
+          grep -q 'func register_elimination' scripts/main.gd
+          grep -q 'func _show_result_screen' scripts/main.gd
+          grep -q 'func _restart_match' scripts/main.gd
+          grep -q 'cycle_speed_step' scripts/hazard.gd
 
       - name: Detect accidental large generated files
         shell: bash
