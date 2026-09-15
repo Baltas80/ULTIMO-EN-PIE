@@ -26,46 +26,47 @@ Git + GitHub.
 Godot Android export para el MVP. Android Studio/SDK se reserva como herramienta auxiliar para tareas Android específicas, firma y diagnóstico cuando sea necesario.
 
 ### CI
-GitHub Actions se incorporará cuando exista una estructura mínima compilable. No se añade CI ficticia antes de tener un proyecto real que probar.
+GitHub Actions ya está incorporado como **puerta de calidad estática**. Actualmente comprueba archivos obligatorios, configuración básica de Godot y ausencia de archivos generados de tamaño anómalo.
 
-## Estructura prevista
+La compilación/exportación real con Godot y Android no se simula en CI: se añadirá cuando exista un entorno Godot/Android verificable. Hasta entonces, cualquier afirmación de build o ejecución Android queda expresamente pendiente.
+
+## Estructura actual del prototipo
 
 ```text
 ULTIMO-EN-PIE/
 ├── project.godot
 ├── scenes/
 │   ├── main.tscn
-│   ├── menu.tscn
-│   ├── arena.tscn
-│   └── result.tscn
+│   ├── player.tscn
+│   ├── bot.tscn
+│   └── hazard.tscn
 ├── scripts/
-│   ├── game.gd
+│   ├── main.gd
 │   ├── player.gd
 │   ├── bot.gd
-│   ├── arena.gd
-│   └── score.gd
-├── assets/
-│   ├── art/
-│   └── audio/
-├── tests/
+│   └── hazard.gd
+├── .github/
+│   └── workflows/
+│       └── quality.yml
 └── docs/
 ```
 
-La estructura es una propuesta inicial; se revisará antes de crear todos los directorios.
+Esta estructura corresponde al núcleo jugable actual. Menú, puntuación persistente, audio, recursos artísticos adicionales y otros sistemas se incorporarán solo después de superar las puertas de validación del núcleo.
 
 ## Orden de implementación
 
-1. Proyecto vacío que arranque.
+1. Proyecto que arranque.
 2. Arena estática.
 3. Jugador y entrada táctil.
-4. Un bot.
+4. Bots deterministas.
 5. Eliminación.
 6. Peligro progresivo.
 7. Escalar hasta 50 participantes y medir rendimiento.
-8. Resultado y puntuación.
-9. Menú y revancha.
-10. Pruebas Android.
-11. Build verificable.
+8. Resultado y revancha.
+9. Menú, puntuación y clasificación.
+10. Audio y pulido.
+11. Pruebas Android.
+12. Build verificable.
 
 ## Regla de optimización
 
