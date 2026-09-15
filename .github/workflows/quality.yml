@@ -155,7 +155,7 @@ jobs:
         run: |
           set -euo pipefail
           set +e
-          "$GODOT_BIN" --headless --path . --quit-after 120 2>&1 | tee godot-runtime.log
+          "$GODOT_BIN" --headless --path . --quit-after 600 2>&1 | tee godot-runtime.log
           status=${PIPESTATUS[0]}
           set -e
           test "$status" -eq 0
