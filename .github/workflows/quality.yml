@@ -117,34 +117,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download official Godot 4.7.2 headless editor
+      - name: Download and verify official Godot 4.7.2 editor
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json
-          import urllib.request
-
-          api = 'https://api.github.com/repos/godotengine/godot-builds/releases/tags/4.7.2-stable'
-          with urllib.request.urlopen(api) as response:
-              release = json.load(response)
-
-          assets = release['assets']
-          matches = [
-              asset for asset in assets
-              if 'linux_headless.64.zip' in asset['name']
-          ]
-          if len(matches) != 1:
-              raise SystemExit(f'Expected one Linux headless asset, found {len(matches)}')
-
-          asset = matches[0]
-          print(asset['browser_download_url'])
-          with open('godot-download-url.txt', 'w', encoding='utf-8') as handle:
-              handle.write(asset['browser_download_url'])
-          PY
-          curl --fail --location --retry 3 "$(cat godot-download-url.txt)" --output godot.zip
+          url='https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip'
+          expected='cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4'
+          curl --fail --location --retry 3 "$url" --output godot.zip
+          actual="$(sha256sum godot.zip | cut -d ' ' -f 1)"
+          test "$actual" = "$expected" || {
+            echo "Godot archive checksum mismatch."
+            exit 1
+          }
           unzip -q godot.zip
-          GODOT_BIN="$(find . -maxdepth 2 -type f -name 'Godot_v4.7.2-stable_linux_headless.64' -print -quit)"
+          GODOT_BIN="$(find . -maxdepth 2 -type f -name 'Godot_v4.7.2-stable_linux.x86_64' -print -quit)"
           test -n "$GODOT_BIN"
           chmod +x "$GODOT_BIN"
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
