@@ -77,7 +77,7 @@ func register_elimination(body: Node) -> void:
 	elimination_count += 1
 	if body == player:
 		player_eliminated = true
-		finish_position = TOTAL_PARTICIPANTS - elimination_count + 1
+		finish_position = clampi(TOTAL_PARTICIPANTS - elimination_count + 1, 1, TOTAL_PARTICIPANTS)
 		_end_match()
 
 func _end_match() -> void:
@@ -86,6 +86,8 @@ func _end_match() -> void:
 	match_active = false
 	if participants.size() == 1 and not player_eliminated:
 		finish_position = 1
+	elif finish_position <= 0:
+		finish_position = clampi(TOTAL_PARTICIPANTS - elimination_count, 1, TOTAL_PARTICIPANTS)
 	var status := get_node_or_null("Status")
 	if status:
 		if player_eliminated:
