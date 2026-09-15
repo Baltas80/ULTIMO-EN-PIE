@@ -35,6 +35,7 @@ jobs:
             scripts/bot.gd
             scripts/hazard.gd
             scripts/elimination_feedback.gd
+            scripts/mvp_smoke_test.gd
             docs/GDD-MVP.md
             docs/TECH-PLAN.md
             docs/ROADMAP-7-DIAS.md
@@ -168,6 +169,12 @@ jobs:
             echo 'Godot runtime smoke test reported a script error.'
             exit 1
           fi
+
+      - name: MVP gameplay smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path . --script res://scripts/mvp_smoke_test.gd
 
       - name: Upload runtime log on failure
         if: failure()
