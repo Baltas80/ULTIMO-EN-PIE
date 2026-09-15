@@ -38,6 +38,7 @@ jobs:
             docs/TECH-PLAN.md
             docs/ROADMAP-7-DIAS.md
             docs/VALIDATION-CHECKLIST.md
+            docs/VISUAL-SPEC-MVP.md
           )
           for file in "${required[@]}"; do
             test -f "$file" || { echo "Missing required file: $file"; exit 1; }
@@ -163,3 +164,11 @@ jobs:
             echo 'Godot runtime smoke test reported a script error.'
             exit 1
           fi
+
+      - name: Upload runtime log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-runtime-log
+          path: godot-runtime.log
+          if-no-files-found: ignore
