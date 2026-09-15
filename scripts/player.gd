@@ -7,9 +7,17 @@ extends CharacterBody2D
 
 var target_x: float
 var active := true
+@onready var core: Polygon2D = $Core
+var visual_time := 0.0
 
 func _ready() -> void:
 	target_x = position.x
+
+func _process(delta: float) -> void:
+	visual_time += delta
+	var pulse := 1.0 + 0.07 * sin(visual_time * 4.0)
+	core.scale.x = pulse
+	core.scale.y = pulse
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
