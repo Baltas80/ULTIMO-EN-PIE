@@ -48,6 +48,8 @@ This checklist must be completed in Godot before the core gameplay PR is merged.
 
 Do not add scoring progression, online multiplayer, cosmetics or additional hazard families until the runtime, scale and Android gates pass.
 
-## Current limitation
+## Current validation status
 
-Runtime and Android validation remain pending because the current execution environment does not provide a runnable Godot/Android toolchain. Static repository checks can be executed, but they do not substitute for device validation.
+GitHub Actions now performs structural checks plus Godot 4.7.2 headless script parsing, project/scene loading and a short runtime smoke test. These checks improve automated coverage but do **not** mark the runtime gate complete.
+
+Device validation remains required for touch mapping, visual presentation, 50-participant responsiveness, Android behavior and the five-minute stability test.
