@@ -34,10 +34,12 @@ jobs:
             scripts/player.gd
             scripts/bot.gd
             scripts/hazard.gd
+            scripts/elimination_feedback.gd
             docs/GDD-MVP.md
             docs/TECH-PLAN.md
             docs/ROADMAP-7-DIAS.md
             docs/VALIDATION-CHECKLIST.md
+            docs/ANDROID-VALIDATION.md
             docs/VISUAL-SPEC-MVP.md
           )
           for file in "${required[@]}"; do
@@ -101,6 +103,8 @@ jobs:
           grep -q 'func _show_result_screen' scripts/main.gd
           grep -q 'func _restart_match' scripts/main.gd
           grep -q 'cycle_speed_step' scripts/hazard.gd
+          grep -q 'body.get("active") != true' scripts/hazard.gd
+          grep -q 'elimination_feedback.gd' scripts/main.gd
 
       - name: Detect accidental large generated files
         shell: bash
