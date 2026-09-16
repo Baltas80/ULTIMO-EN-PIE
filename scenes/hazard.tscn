@@ -10,6 +10,11 @@ script = ExtResource("1_hazard")
 
 [node name="Visual" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(-34, 0, -24, -24, 0, -34, 24, -24, 34, 0, 24, 24, 0, 34, -24, 24)
+color = Color(1, 0.24, 0.27, 1)
+
+[node name="Core" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-15, 0, -10, -10, 0, -15, 10, -10, 15, 0, 10, 10, 0, 15, -10, 10)
+color = Color(1, 0.6, 0.2, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_hazard")
