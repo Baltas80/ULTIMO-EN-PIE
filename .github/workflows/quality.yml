@@ -26,6 +26,7 @@ jobs:
           set -euo pipefail
           required=(
             project.godot
+            export_presets.cfg
             scenes/main.tscn
             scenes/player.tscn
             scenes/bot.tscn
@@ -55,6 +56,17 @@ jobs:
           grep -q '^run/main_scene="res://scenes/main.tscn"$' project.godot
           grep -q 'config/features=PackedStringArray("4.7"' project.godot
           test -f scenes/main.tscn
+
+      - name: Validate Android export preset
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^name="Android Debug"$' export_presets.cfg
+          grep -q '^platform="Android"$' export_presets.cfg
+          grep -q '^package/unique_name="com.baltas80.ultimoenpie"$' export_presets.cfg
+          grep -q '^package/version_code=1$' export_presets.cfg
+          grep -q '^package/version_name="0.1.0"$' export_presets.cfg
+          grep -q '^architectures/arm64-v8a=true$' export_presets.cfg
 
       - name: Validate res:// references
         shell: bash
