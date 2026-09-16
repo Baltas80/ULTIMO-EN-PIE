@@ -26,9 +26,15 @@ Git + GitHub.
 Godot Android export para el MVP. Android Studio/SDK se reserva como herramienta auxiliar para tareas Android específicas, firma y diagnóstico cuando sea necesario.
 
 ### CI
-GitHub Actions ya está incorporado como **puerta de calidad estática**. Actualmente comprueba archivos obligatorios, configuración básica de Godot y ausencia de archivos generados de tamaño anómalo.
+GitHub Actions funciona como **puerta de calidad automática**. Además de las comprobaciones estructurales, el workflow descarga el editor headless oficial de Godot 4.7.2 y realiza tres niveles de comprobación:
 
-La compilación/exportación real con Godot y Android no se simula en CI: se añadirá cuando exista un entorno Godot/Android verificable. Hasta entonces, cualquier afirmación de build o ejecución Android queda expresamente pendiente.
+1. análisis sintáctico de todos los scripts GDScript;
+2. carga del proyecto y de la escena principal en modo editor headless;
+3. smoke test de ejecución del proyecto durante un número limitado de frames.
+
+Esto permite detectar errores reales de parseo y determinados fallos de carga/ejecución antes de volver al dispositivo. La CI no sustituye la validación táctil, visual, de rendimiento ni Android real.
+
+La compilación/exportación Android no se simula: se añadirá cuando exista una configuración Android verificable y reproducible.
 
 ## Estructura actual del prototipo
 

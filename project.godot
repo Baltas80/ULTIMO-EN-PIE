@@ -21,6 +21,7 @@ stretch/mode="canvas_items"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.04, 0.04, 0.05, 1)
+textures/vram_compression/import_etc2_astc=true
 
 [input]
 touch_move_left={"deadzone": 0.5, "events": [Object(InputEventScreenTouch,"resource_local_to_scene":false,"position":Vector2(0,0),"pressed":false,"double_tap":false,"index":0)]}
