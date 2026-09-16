@@ -19,35 +19,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Validate required files
         shell: bash
         run: |
           set -euo pipefail
-          required=(
-            project.godot
-            export_presets.cfg
-            scenes/main.tscn
-            scenes/player.tscn
-            scenes/bot.tscn
-            scenes/hazard.tscn
-            scripts/main.gd
-            scripts/player.gd
-            scripts/bot.gd
-            scripts/hazard.gd
-            scripts/elimination_feedback.gd
-            scripts/mvp_smoke_test.gd
-            docs/GDD-MVP.md
-            docs/TECH-PLAN.md
-            docs/ROADMAP-7-DIAS.md
-            docs/VALIDATION-CHECKLIST.md
-            docs/ANDROID-VALIDATION.md
-            docs/VISUAL-SPEC-MVP.md
-          )
-          for file in "${required[@]}"; do
-            test -f "$file" || { echo "Missing required file: $file"; exit 1; }
-          done
-
+          required=(project.godot export_presets.cfg scenes/main.tscn scenes/player.tscn scenes/bot.tscn scenes/hazard.tscn scripts/main.gd scripts/player.gd scripts/bot.gd scripts/hazard.gd scripts/elimination_feedback.gd scripts/mvp_smoke_test.gd docs/GDD-MVP.md docs/TECH-PLAN.md docs/ROADMAP-7-DIAS.md docs/VALIDATION-CHECKLIST.md docs/ANDROID-VALIDATION.md docs/VISUAL-SPEC-MVP.md)
+          for file in "${required[@]}"; do test -f "$file" || { echo "Missing required file: $file"; exit 1; }; done
       - name: Check Godot project configuration
         shell: bash
         run: |
@@ -55,7 +32,6 @@ jobs:
           grep -q '^config_version=5$' project.godot
           grep -q '^run/main_scene="res://scenes/main.tscn"$' project.godot
           grep -q 'config/features=PackedStringArray("4.7"' project.godot
-
       - name: Validate Android export preset
         shell: bash
         run: |
@@ -66,7 +42,6 @@ jobs:
           grep -q '^package/version_code=1$' export_presets.cfg
           grep -q '^package/version_name="0.1.0"$' export_presets.cfg
           grep -q '^architectures/arm64-v8a=true$' export_presets.cfg
-
       - name: Validate res:// references
         shell: bash
         run: |
@@ -74,34 +49,21 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           root = Path('.')
           references = []
-          patterns = [
-              re.compile(r'path="(res://[^"\n]+)"'),
-              re.compile(r'preload\("(res://[^"\n]+)"\)'),
-          ]
+          patterns = [re.compile(r'path="(res://[^"\n]+)"'), re.compile(r'preload\("(res://[^"\n]+)"\)')]
           for path in root.rglob('*'):
-              if not path.is_file() or '.git' in path.parts:
-                  continue
-              if path.suffix not in {'.tscn', '.gd'}:
-                  continue
+              if not path.is_file() or '.git' in path.parts or path.suffix not in {'.tscn', '.gd'}: continue
               text = path.read_text(encoding='utf-8')
-              for pattern in patterns:
-                  references.extend((path, m.group(1)) for m in pattern.finditer(text))
-
+              for pattern in patterns: references.extend((path, m.group(1)) for m in pattern.finditer(text))
           missing = []
           for source, reference in references:
               target = root / reference.removeprefix('res://')
-              if not target.is_file():
-                  missing.append(f'{source}: {reference}')
+              if not target.is_file(): missing.append(f'{source}: {reference}')
           if missing:
-              print('Broken res:// references:')
-              print('\n'.join(missing))
-              raise SystemExit(1)
+              print('Broken res:// references:'); print('\n'.join(missing)); raise SystemExit(1)
           print(f'Validated {len(references)} res:// file references.')
           PY
-
       - name: Validate MVP invariants
         shell: bash
         run: |
@@ -114,15 +76,11 @@ jobs:
           grep -q 'cycle_speed_step' scripts/hazard.gd
           grep -q 'body.get("active") != true' scripts/hazard.gd
           grep -q 'elimination_feedback.gd' scripts/main.gd
-
       - name: Detect accidental large generated files
         shell: bash
         run: |
           set -euo pipefail
-          if find . -type f -not -path './.git/*' -size +10M -print -quit | grep -q .; then
-            echo "A tracked project file exceeds 10 MB. Review before merging."
-            exit 1
-          fi
+          if find . -type f -not -path './.git/*' -size +10M -print -quit | grep -q .; then echo "A tracked project file exceeds 10 MB. Review before merging."; exit 1; fi
 
   godot:
     name: Validate with Godot 4.7.2
@@ -130,7 +88,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Download and verify official Godot 4.7.2 editor
         shell: bash
         run: |
@@ -145,21 +102,16 @@ jobs:
           test -n "$GODOT_BIN"
           chmod +x "$GODOT_BIN"
           echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
-
       - name: Parse all GDScript files
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' script; do
-            "$GODOT_BIN" --headless --path . --check-only --script "$script"
-          done < <(find scripts -type f -name '*.gd' -print0 | sort -z)
-
+          while IFS= read -r -d '' script; do "$GODOT_BIN" --headless --path . --check-only --script "$script"; done < <(find scripts -type f -name '*.gd' -print0 | sort -z)
       - name: Load project and main scene
         shell: bash
         run: |
           set -euo pipefail
           "$GODOT_BIN" --headless --path . --editor --quit
-
       - name: Runtime smoke test
         shell: bash
         run: |
@@ -170,13 +122,11 @@ jobs:
           set -e
           test "$status" -eq 0
           ! grep -E 'SCRIPT ERROR|Parse Error' godot-runtime.log
-
       - name: MVP gameplay smoke test
         shell: bash
         run: |
           set -euo pipefail
           "$GODOT_BIN" --headless --path . --script res://scripts/mvp_smoke_test.gd
-
       - name: Upload runtime log on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -184,13 +134,11 @@ jobs:
           name: godot-runtime-log
           path: godot-runtime.log
           if-no-files-found: ignore
-
       - name: Install Java 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Configure preinstalled Android SDK
         shell: bash
         run: |
@@ -202,35 +150,32 @@ jobs:
           echo "ANDROID_SDK_ROOT=$sdk_root" >> "$GITHUB_ENV"
           echo "$sdk_root/platform-tools" >> "$GITHUB_PATH"
           echo "$sdk_root/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-
       - name: Accept Android SDK licenses
         shell: bash
         run: |
           set -euo pipefail
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-
       - name: Install Android SDK packages
         shell: bash
         run: |
           set -euo pipefail
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
-            'platform-tools' \
-            'platforms;android-36' \
-            'build-tools;36.1.0'
-
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" 'platform-tools' 'platforms;android-36' 'build-tools;36.1.0'
       - name: Install matching Godot Android export templates
         shell: bash
         run: |
           set -euo pipefail
           templates_dir="$HOME/.local/share/godot/export_templates/4.7.2.stable"
-          mkdir -p "$templates_dir"
-          curl --fail --location --retry 3 \
-            'https://downloads.godotengine.org/?flavor=stable&platform=templates&slug=export_templates.tpz&version=4.7.2' \
-            --output godot_export_templates.tpz
-          unzip -q -o godot_export_templates.tpz -d "$templates_dir"
+          extract_dir="$RUNNER_TEMP/godot-export-templates"
+          rm -rf "$extract_dir"
+          mkdir -p "$templates_dir" "$extract_dir"
+          curl --fail --location --retry 3 'https://downloads.godotengine.org/?flavor=stable&platform=templates&slug=export_templates.tpz&version=4.7.2' --output godot_export_templates.tpz
+          unzip -q -o godot_export_templates.tpz -d "$extract_dir"
+          test -f "$extract_dir/templates/android_debug.apk"
+          test -f "$extract_dir/templates/android_release.apk"
+          cp "$extract_dir/templates/android_debug.apk" "$templates_dir/android_debug.apk"
+          cp "$extract_dir/templates/android_release.apk" "$templates_dir/android_release.apk"
           test -f "$templates_dir/android_debug.apk"
           test -f "$templates_dir/android_release.apk"
-
       - name: Export Android debug APK
         shell: bash
         run: |
@@ -238,7 +183,6 @@ jobs:
           mkdir -p build
           "$GODOT_BIN" --headless --path . --export-debug 'Android Debug' build/ultimo-en-pie-debug.apk
           test -s build/ultimo-en-pie-debug.apk
-
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
         with:
